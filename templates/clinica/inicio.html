@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - CitasMédicas{% endblock %}
+
+{% block content %}
+<!-- ================= HERO SECTION DINÁMICO ================= -->
+{% if not user.is_authenticated %}
+  <!-- VISTA 1: USUARIO INVITADO (Marketing y Registro) -->
+  <div class="row align-items-center py-5 my-2">
+    <div class="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
+      <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill mb-3">
+        <i class="bi bi-shield-check me-1"></i> Plataforma Médica Digital
+      </span>
+      <h1 class="display-4 fw-bold text-dark lh-sm mb-3">
+        Tu salud en manos de <span class="text-primary">profesionales</span>
+      </h1>
+      <p class="lead text-muted mb-4">
+        Agenda tus consultas médicas en minutos, elige a tu especialista de confianza y gestiona todas tus citas desde un solo lugar, sin filas ni demoras.
+      </p>
+      <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
+        <a href="{% url 'usuarios:registro' %}" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">
+          <i class="bi bi-person-plus-fill me-2"></i>Crear una Cuenta
+        </a>
+        <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-lg px-4 fw-semibold">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-5 d-none d-lg-block">
+      <div class="card border-0 bg-primary-subtle rounded-4 h-100 d-flex align-items-center justify-content-center p-5">
+         <i class="bi bi-heart-pulse text-primary" style="font-size: 8rem; opacity: 0.8;"></i>
+      </div>
+    </div>
+  </div>
+
+{% elif user.tipo_usuario == 'MEDICO' or user.es_medico %}
+  <!-- VISTA 3: MÉDICO (Resumen de trabajo) -->
+  <div class="bg-success text-white rounded-4 p-4 p-md-5 my-4 shadow-sm position-relative overflow-hidden">
+    <div class="position-relative z-1">
+      <h2 class="display-6 fw-bold mb-2">Bienvenido(a), Dr(a). {{ user.last_name|default:user.username }} 🩺</h2>
+      <p class="fs-5 text-white-50 mb-4">Revisa tus próximas consultas y mantén tu agenda al día.</p>
+      <div class="d-flex flex-column flex-sm-row gap-3">
+        <a href="{% url 'citas:agenda_medico' %}" class="btn btn-light text-success btn-lg px-4 fw-bold shadow-sm">
+          <i class="bi bi-calendar-check me-2"></i>Ver Mi Agenda
+        </a>
+      </div>
+    </div>
+    <i class="bi bi-capsule position-absolute text-white" style="font-size: 15rem; right: -2rem; bottom: -4rem; opacity: 0.1; z-index: 0;"></i>
+  </div>
+
+{% elif user.tipo_usuario == 'ADMIN' or user.is_superuser %}
+  <!-- VISTA 4: ADMINISTRADOR (Gestión general) -->
+  <div class="bg-dark text-white rounded-4 p-4 p-md-5 my-4 shadow-sm position-relative overflow-hidden">
+    <div class="position-relative z-1">
+      <h2 class="display-6 fw-bold mb-2">Panel de Control General ⚙️</h2>
+      <p class="fs-5 text-white-50 mb-4">Gestión operativa de médicos, especialidades y turnos de la clínica.</p>
+      <div class="d-flex flex-column flex-sm-row gap-3">
+        <a href="{% url 'citas:turno_list' %}" class="btn btn-warning text-dark btn-lg px-4 fw-bold shadow-sm">
+          <i class="bi bi-calendar-range me-2"></i>Gestionar Turnos
+        </a>
+        <a href="/admin/" target="_blank" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+          <i class="bi bi-shield-lock me-2"></i>Administración Avanzada
+        </a>
+      </div>
+    </div>
+    <i class="bi bi-gear-fill position-absolute text-white" style="font-size: 15rem; right: -2rem; bottom: -5rem; opacity: 0.1; z-index: 0;"></i>
+  </div>
+
+{% else %}
+  <!-- VISTA 2: PACIENTE REGISTRADO (Por defecto para el resto de usuarios) -->
+  <div class="bg-primary text-white rounded-4 p-4 p-md-5 my-4 shadow-sm position-relative overflow-hidden">
+    <div class="position-relative z-1">
+      <h2 class="display-6 fw-bold mb-2">¡Hola, {{ user.get_full_name|default:user.username }}! 👋</h2>
+      <p class="fs-5 text-white-50 mb-4">¿Cómo podemos ayudarte a cuidar tu salud hoy?</p>
+      <div class="d-flex flex-column flex-sm-row gap-3">
+        <a href="{% url 'citas:cita_create' %}" class="btn btn-light text-primary btn-lg px-4 fw-bold shadow-sm">
+          <i class="bi bi-calendar-plus me-2"></i>Agendar Nueva Cita
+        </a>
+        <a href="{% url 'citas:mis_citas' %}" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+          <i class="bi bi-journal-medical me-2"></i>Mis Citas
+        </a>
+      </div>
+    </div>
+    <i class="bi bi-bandaid position-absolute text-white" style="font-size: 15rem; right: -2rem; bottom: -4rem; opacity: 0.1; z-index: 0;"></i>
+  </div>
+  <!-- ================= BENEFICIOS ================= -->
+<div class="row g-4 py-4 mb-4">
+  <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm p-3 rounded-3 text-center">
+      <div class="card-body">
+        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-3 mb-3">
+          <i class="bi bi-clock-history fs-3"></i>
+        </div>
+        <h5 class="fw-bold">Reserva al Instante</h5>
+        <p class="text-muted small mb-0">Consulta la disponibilidad de horarios en tiempo real y reserva la cita que mejor se adapte a tu agenda.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm p-3 rounded-3 text-center">
+      <div class="card-body">
+        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-3 mb-3">
+          <i class="bi bi-person-badge fs-3"></i>
+        </div>
+        <h5 class="fw-bold">Especialistas Verificados</h5>
+        <p class="text-muted small mb-0">Accede a profesionales certificados con licencias médicas vigentes e información detallada de consultorios.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm p-3 rounded-3 text-center">
+      <div class="card-body">
+        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-3 mb-3">
+          <i class="bi bi-ui-checks-grid fs-3"></i>
+        </div>
+        <h5 class="fw-bold">Gestión de Citas</h5>
+        <p class="text-muted small mb-0">Revisa tu historial, confirma fechas pendientes o cancela turnos con total libertad desde tu panel personal.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ESPECIALIDADES DESTACADAS ================= -->
+<div class="mb-5 py-3">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1"><i class="bi bi-journal-medical text-primary me-2"></i>Especialidades Destacadas</h3>
+      <p class="text-muted small mb-0">Explora las áreas de salud más consultadas</p>
+    </div>
+    <a href="{% url 'clinica:lista_especialidades' %}" class="btn btn-link text-primary fw-bold text-decoration-none p-0">
+      Ver todas <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  {% if especialidades_destacadas %}
+    <div class="row g-3">
+      {% for esp in especialidades_destacadas %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body d-flex align-items-center">
+              <div class="bg-light text-primary rounded-3 p-3 me-3">
+                <i class="bi bi-heart-pulse fs-3"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1">{{ esp.nombre }}</h6>
+                <p class="text-muted small mb-2 text-truncate" style="max-width: 200px;">
+                  {{ esp.descripcion|default:"Especialidad disponible" }}
+                </p>
+                <a href="{% url 'clinica:lista_medicos' %}?especialidad={{ esp.id }}" class="small fw-semibold text-primary text-decoration-none">
+                  Ver especialistas &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-light text-center py-4 border">
+      <p class="text-muted mb-0">No hay especialidades registradas aún.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ================= MÉDICOS DESTACADOS ================= -->
+<div class="mb-5 py-3">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1"><i class="bi bi-person-badge text-primary me-2"></i>Nuestros Médicos</h3>
+      <p class="text-muted small mb-0">Conoce al equipo médico a tu disposición</p>
+    </div>
+    <a href="{% url 'clinica:lista_medicos' %}" class="btn btn-link text-primary fw-bold text-decoration-none p-0">
+      Ver directorio completo <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  {% if medicos_destacados %}
+    <div class="row g-3">
+      {% for med in medicos_destacados %}
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm text-center p-3 rounded-3">
+            <div class="card-body">
+              <div class="mb-3">
+                <i class="bi bi-person-circle fs-1 text-primary"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Dr(a). {{ med.usuario.get_full_name|default:med.usuario.username }}</h6>
+              <span class="badge bg-primary-subtle text-primary mb-2">{{ med.especialidad.nombre }}</span>
+              <p class="text-muted small mb-3">
+                <i class="bi bi-geo-alt me-1"></i>{{ med.consultorio|default:"Consultorio Central" }}
+              </p>
+              
+              {% if user.is_authenticated and not user.es_medico %}
+                <a href="{% url 'citas:cita_create' %}?medico={{ med.id }}" class="btn btn-sm btn-outline-primary w-100 fw-bold">
+                  Agendar Cita
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endif %}
+
+
+
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Especialidades Médicas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-primary mb-1"><i class="bi bi-journal-medical me-2"></i>Especialidades Médicas</h3>
+        <p class="text-muted small mb-0">Catálogo de áreas médicas disponibles en el centro clínico</p>
+    </div>
+    {% if user.is_staff or user.is_superuser or user.tipo_usuario == 'ADMIN' %}
+        <a href="{% url 'clinica:crear_especialidad' %}" class="btn btn-success fw-bold">
+            <i class="bi bi-plus-circle me-1"></i> Nueva Especialidad
+        </a>
+    {% endif %}
+</div>
+
+{% if especialidades %}
+    <div class="row g-3">
+        {% for esp in especialidades %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-shield-plus fs-2 text-primary me-3"></i>
+                            <h5 class="card-title fw-bold mb-0">{{ esp.nombre }}</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            {{ esp.descripcion|default:"Atención profesional especializada disponible en nuestro centro médico." }}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3 d-flex justify-content-between align-items-center">
+                        <a href="{% url 'clinica:lista_medicos' %}?especialidad={{ esp.id }}" class="btn btn-sm btn-outline-primary">
+                            Ver médicos &rarr;
+                        </a>
+                        {% if user.is_staff or user.is_superuser or user.tipo_usuario == 'ADMIN' %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'clinica:editar_especialidad' esp.id %}" class="btn btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'clinica:eliminar_especialidad' esp.id %}" class="btn btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center py-4 shadow-sm" role="alert">
+        <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+        No hay especialidades registradas en el sistema.
+    </div>
+{% endif %}
+{% endblock %}

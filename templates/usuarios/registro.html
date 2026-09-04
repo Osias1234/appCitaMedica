@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Paciente - Citas Médicas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-header bg-primary text-white py-3 text-center">
+                <i class="bi bi-person-plus-fill fs-2"></i>
+                <h4 class="fw-bold mb-0 mt-1">Registro de Paciente</h4>
+                <small class="text-white-50">Crea tu cuenta para agendar y gestionar tus citas médicas</small>
+            </div>
+            <div class="card-body p-4">
+
+                {% if form.errors %}
+                    <div class="alert alert-danger py-2 small" role="alert">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Por favor corrige los errores marcados abajo en el formulario.
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Sección 1: Datos de Usuario y Autenticación -->
+                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-shield-lock me-2"></i>1. Datos de Cuenta
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nombre de Usuario *</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Correo Electrónico *</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Contraseña *</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirmar Contraseña *</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Datos Personales -->
+                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-person-vcard me-2"></i>2. Información Personal
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nombre(s) *</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Apellido(s) *</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Cédula de Identidad *</label>
+                            {{ form.ci }}
+                            {% if form.ci.errors %}<div class="text-danger small">{{ form.ci.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teléfono / Celular</label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}<div class="text-danger small">{{ form.telefono.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Sección 3: Datos de Perfil de Paciente -->
+                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-hospital me-2"></i>3. Datos de Perfil Paciente
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}<div class="text-danger small">{{ form.fecha_nacimiento.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Dirección</label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}<div class="text-danger small">{{ form.direccion.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Contacto de Emergencia</label>
+                            {{ form.contacto_emergencia }}
+                            {% if form.contacto_emergencia.errors %}<div class="text-danger small">{{ form.contacto_emergencia.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                            <i class="bi bi-check-circle me-1"></i>Completar Registro
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <span class="text-muted small">¿Ya tienes una cuenta registrada?</span> 
+                <a href="{% url 'usuarios:login' %}" class="fw-bold text-decoration-none ms-1">Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

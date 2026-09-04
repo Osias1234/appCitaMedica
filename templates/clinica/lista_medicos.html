@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Directorio Médico{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-primary mb-1"><i class="bi bi-person-badge me-2"></i>Directorio Médico</h3>
+        <p class="text-muted small mb-0">Encuentra al especialista ideal para tu atención de salud</p>
+    </div>
+    {% if user.is_staff or user.is_superuser or user.tipo_usuario == 'ADMIN' %}
+        <a href="{% url 'clinica:crear_medico' %}" class="btn btn-success fw-bold">
+            <i class="bi bi-person-plus me-1"></i> Registrar Médico
+        </a>
+    {% endif %}
+</div>
+
+<!-- Barra de Filtros y Búsqueda -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control" placeholder="Buscar por médico o especialidad...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="especialidad" class="form-select">
+                    <option value="">-- Todas las Especialidades --</option>
+                    {% for esp in especialidades %}
+                        <option value="{{ esp.id }}" {% if request.GET.especialidad == esp.id|stringformat:"i" %}selected{% endif %}>
+                            {{ esp.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary fw-bold">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado de Médicos -->
+{% if medicos %}
+    <div class="row g-3">
+        {% for med in medicos %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold mb-1">Dr(a). {{ med.usuario.get_full_name|default:med.usuario.username }}</h5>
+                            <span class="badge bg-info text-white mb-2">{{ med.especialidad.nombre }}</span>
+                            <p class="text-muted small mb-1">
+                                <i class="bi bi-card-heading me-1"></i><strong>Licencia:</strong> {{ med.licencia_medica }}
+                            </p>
+                            {% if med.consultorio %}
+                                <p class="text-muted small mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i><strong>Consultorio:</strong> {{ med.consultorio }}
+                                </p>
+                            {% endif %}
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-envelope me-1"></i>{{ med.usuario.email|default:"Sin correo registrado" }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-0 pb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if user.is_authenticated and not user.es_medico %}
+                                <a href="{% url 'citas:cita_create' %}?medico={{ med.id }}" class="btn btn-sm btn-outline-primary fw-bold">
+                                    <i class="bi bi-calendar-plus me-1"></i>Agendar Cita
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        {% if user.is_staff or user.is_superuser or user.tipo_usuario == 'ADMIN' %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'clinica:editar_medico' med.id %}" class="btn btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'clinica:eliminar_medico' med.id %}" class="btn btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center py-4 shadow-sm" role="alert">
+        <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+        No se encontraron médicos con los criterios de búsqueda especificados.
+    </div>
+{% endif %}
+{% endblock %}

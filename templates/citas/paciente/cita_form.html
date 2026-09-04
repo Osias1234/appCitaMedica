@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="h5 mb-0">Agendar Nueva Cita</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="form-cita">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium text-muted">1. Especialidad</label>
+                                {{ form.especialidad }}
+                                <div class="text-danger small mt-1">{{ form.especialidad.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mt-3 mt-md-0">
+                                <label class="form-label fw-medium text-muted">2. Médico</label>
+                                {{ form.medico }}
+                                <div class="text-danger small mt-1">{{ form.medico.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium text-muted">3. Fecha de la cita</label>
+                                {{ form.fecha }}
+                                <div class="form-text">Selecciona un día para ver los horarios.</div>
+                                <div class="text-danger small mt-1">{{ form.fecha.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mt-3 mt-md-0">
+                                <label class="form-label fw-medium text-muted">4. Hora seleccionada</label>
+                                {{ form.hora }}
+                                <div class="text-danger small mt-1">{{ form.hora.errors }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Panel dinámico de horarios -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium text-muted">Horarios Disponibles</label>
+                            <div id="horas-container" class="p-3 bg-light border rounded min-vh-25">
+                                <p class="text-muted mb-0 text-center small">Selecciona una especialidad, un médico y una fecha para ver los horarios.</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium text-muted">Motivo de la consulta (Opcional)</label>
+                            {{ form.motivo }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{% url 'citas:mis_citas' %}" class="btn btn-light px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4" id="btn-guardar">Confirmar Cita</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lógica de peticiones AJAX con Vanilla JS (Fetch API) -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const especialidadSelect = document.getElementById('id_especialidad');
+    const medicoSelect = document.getElementById('id_medico');
+    const fechaInput = document.getElementById('id_fecha');
+    const horaInput = document.getElementById('id_hora');
+    const horasContainer = document.getElementById('horas-container');
+
+    // 1. Al cambiar la especialidad, cargar médicos
+    especialidadSelect.addEventListener('change', function() {
+        const especialidadId = this.value;
+        medicoSelect.innerHTML = '<option value="">Seleccione Médico</option>';
+        resetFechaYHoras();
+
+        if (especialidadId) {
+            // URL dinámica generada por Django
+            const url = "{% url 'citas:ajax_cargar_medicos' %}?especialidad_id=" + especialidadId;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(med => {
+                        medicoSelect.innerHTML += `<option value="${med.id}">${med.nombre}</option>`;
+                    });
+                })
+                .catch(error => console.error('Error al cargar médicos:', error));
+        }
+    });
+
+    // 2. Al cambiar el médico, limpiar fechas y horas
+    medicoSelect.addEventListener('change', resetFechaYHoras);
+
+    // 3. Al cambiar la fecha, cargar los bloques horarios generados
+    fechaInput.addEventListener('change', function() {
+        const medicoId = medicoSelect.value;
+        const fechaVal = this.value;
+
+        if (!medicoId || !fechaVal) return;
+
+        horasContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
+        horaInput.value = '';
+
+        // URL dinámica generada por Django para las horas
+        const urlHoras = "{% url 'citas:ajax_cargar_horas' %}?medico_id=" + medicoId + "&fecha=" + fechaVal;
+
+        fetch(urlHoras)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.horas || data.horas.length === 0) {
+                    horasContainer.innerHTML = '<div class="alert alert-warning mb-0 text-center">El médico no tiene turnos programados o disponibles para esta fecha.</div>';
+                    return;
+                }
+
+                let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
+                data.horas.forEach(slot => {
+                    if (slot.disponible) {
+                        botonesHTML += `<button type="button" class="btn btn-outline-primary btn-hora" data-hora="${slot.hora}">${slot.hora}</button>`;
+                    } else {
+                        botonesHTML += `<button type="button" class="btn btn-danger disabled" aria-disabled="true">${slot.hora}</button>`;
+                    }
+                });
+                botonesHTML += '</div>';
+                horasContainer.innerHTML = botonesHTML;
+
+                // Asignar evento a los nuevos botones de horas
+                document.querySelectorAll('.btn-hora').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.btn-hora').forEach(b => {
+                            b.classList.remove('btn-primary', 'text-white');
+                            b.classList.add('btn-outline-primary');
+                        });
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('btn-primary', 'text-white');
+                        horaInput.value = this.dataset.hora;
+                    });
+                });
+            })
+            .catch(error => {
+                horasContainer.innerHTML = '<div class="alert alert-danger mb-0">Error al consultar los horarios. Intente nuevamente.</div>';
+            });
+    });
+
+    function resetFechaYHoras() {
+        fechaInput.value = '';
+        horaInput.value = '';
+        horasContainer.innerHTML = '<p class="text-muted mb-0 text-center small">Selecciona una especialidad, un médico y una fecha para ver los horarios.</p>';
+    }
+});
+</script>
+{% endblock %}

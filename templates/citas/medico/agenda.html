@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    
+    <!-- Encabezado de la Agenda -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="h3 mb-0 text-dark fw-bold">
+                <i class="bi bi-calendar2-check-fill me-2 text-primary"></i>Mi Agenda Médica
+            </h2>
+            <p class="text-muted mb-0 mt-1">Panel de control de consultas y disponibilidad de turnos</p>
+        </div>
+
+    </div>
+
+    <!-- Panel de Filtros Avanzados -->
+    <div class="card border-0 shadow-sm mb-4 rounded-4 bg-light">
+        <div class="card-body p-4">
+            <form method="GET" class="row g-3 align-items-end">
+                <!-- Filtro por Paciente -->
+                <div class="col-md-4">
+                    <label for="paciente" class="form-label text-muted small fw-bold text-uppercase mb-1">Buscar Paciente</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="paciente" name="paciente" value="{{ request.GET.paciente }}" placeholder="Nombre o apellido...">
+                    </div>
+                </div>
+
+                <!-- Filtro por Fecha -->
+                <div class="col-md-3">
+                    <label for="fecha" class="form-label text-muted small fw-bold text-uppercase mb-1">Fecha de Cita</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-calendar"></i></span>
+                        <input type="date" class="form-control border-start-0 ps-0" id="fecha" name="fecha" value="{{ request.GET.fecha }}">
+                    </div>
+                </div>
+
+                <!-- Filtro por Estado -->
+                <div class="col-md-3">
+                    <label for="estado" class="form-label text-muted small fw-bold text-uppercase mb-1">Estado</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-filter"></i></span>
+                        <select class="form-select border-start-0 ps-0" id="estado" name="estado">
+                            <option value="">Todos los estados</option>
+                            <option value="PENDIENTE" {% if request.GET.estado == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                            <option value="CONFIRMADA" {% if request.GET.estado == 'CONFIRMADA' %}selected{% endif %}>Confirmada</option>
+                            <option value="COMPLETADA" {% if request.GET.estado == 'COMPLETADA' %}selected{% endif %}>Completada</option>
+                            <option value="CANCELADA" {% if request.GET.estado == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción del Filtro -->
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold shadow-sm">
+                        Filtrar
+                    </button>
+                    {% if request.GET.paciente or request.GET.fecha or request.GET.estado %}
+                        <a href="{% url 'citas:agenda_medico' %}" class="btn btn-outline-secondary px-3" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Columna Principal: Lista de Citas (Ocupa 8 espacios) -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100 overflow-hidden">
+                <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="h6 mb-0 text-dark fw-bold">
+                        <i class="bi bi-journal-medical text-primary me-2"></i>Consultas Programadas
+                    </h5>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3">{{ citas|length }} citas encontradas</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Fecha y Hora</th>
+                                    <th>Paciente</th>
+                                    <th>Estado</th>
+                                    <th class="text-end pe-4">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cita in citas %}
+                                <tr class="border-bottom">
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">{{ cita.fecha|date:"d/m/Y" }}</div>
+                                        <div class="text-primary small fw-semibold"><i class="bi bi-clock me-1"></i>{{ cita.hora|time:"H:i" }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle p-2 me-3 text-primary d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
+                                                <i class="bi bi-person-fill"></i>
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block">{{ cita.paciente.usuario.get_full_name|default:cita.paciente.usuario.username }}</span>
+                                                <small class="text-muted">Paciente registrado</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if cita.estado == 'PENDIENTE' %}
+                                            <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning-subtle px-3 py-2">
+                                                <i class="bi bi-hourglass-split me-1"></i> Pendiente
+                                            </span>
+                                        {% elif cita.estado == 'CONFIRMADA' %}
+                                            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2">
+                                                <i class="bi bi-check-circle me-1"></i> Confirmada
+                                            </span>
+                                        {% elif cita.estado == 'COMPLETADA' %}
+                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2">
+                                                <i class="bi bi-check-all me-1"></i> Completada
+                                            </span>
+                                        {% else %}
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-2">
+                                                <i class="bi bi-x-circle me-1"></i> Cancelada
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'citas:cita_medico_update' cita.pk %}" class="btn btn-sm btn-light border text-primary fw-semibold px-3 shadow-sm">
+                                            <i class="bi bi-pencil-square me-1"></i> Gestionar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="py-4">
+                                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                                            <p class="text-muted mt-3 mb-0 fw-medium">No se encontraron citas con los filtros seleccionados.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Secundaria: Turnos Activos / Disponibilidad (Ocupa 4 espacios) -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100 overflow-hidden">
+                <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="h6 mb-0 text-dark fw-bold">
+                        <i class="bi bi-clock-history text-primary me-2"></i>Mis Turnos (Disponibilidad)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for turno in mis_turnos %}
+                        <li class="list-group-item py-3 px-4 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="d-block text-dark"><i class="bi bi-calendar-event me-1 text-muted"></i>{{ turno.fecha|date:"d/m/Y" }}</strong>
+                                    <small class="text-muted"><i class="bi bi-alarm me-1"></i>{{ turno.hora_inicio|time:"H:i" }} - {{ turno.hora_fin|time:"H:i" }}</small>
+                                </div>
+                                <span class="badge bg-light text-secondary border px-3 py-2 fw-semibold">
+                                    <i class="bi bi-hourglass me-1"></i>{{ turno.horas_totales }}h
+                                </span>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center py-5 text-muted border-0">
+                            <i class="bi bi-calendar2-slash fs-2 opacity-50 d-block mb-2"></i>
+                            No tienes turnos activos asignados.
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

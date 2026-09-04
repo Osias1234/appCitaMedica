@@ -1,0 +1,150 @@
+<!-- Barra Lateral Estructurada con Bootstrap 5 -->
+<div class="sidebar-fixed text-white d-flex flex-column shadow" id="sidebarContainer">
+  
+  <!-- Cabecera del Sidebar con Botón de Ocultar -->
+  <div class="d-flex align-items-center justify-content-between mb-3 mb-md-0 me-md-auto text-white w-100 px-2">
+    <a href="{% url 'clinica:inicio' %}" class="d-flex align-items-center text-white text-decoration-none">
+      <i class="bi bi-hospital fs-3 me-2 text-info"></i>
+      <span class="fs-5 fw-bold tracking-wide">CitasMédicas</span>
+    </a>
+    
+  </div>
+  
+  <hr class="text-white-50 my-3">
+
+  <!-- Navegación Principal -->
+  <ul class="nav nav-pills flex-column mb-auto gap-1">
+    <li class="nav-item">
+      <a href="{% url 'clinica:inicio' %}" class="nav-link">
+        <i class="bi bi-house-door me-2"></i>Inicio
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'clinica:lista_medicos' %}" class="nav-link">
+        <i class="bi bi-person-badge me-2"></i>Médicos
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'clinica:lista_especialidades' %}" class="nav-link">
+        <i class="bi bi-journal-medical me-2"></i>Especialidades
+      </a>
+    </li>
+
+    {% if user.is_authenticated %}
+      <hr class="text-white-50 my-2">
+      
+      <!-- Enlaces condicionales por rol -->
+      {% if user.tipo_usuario == 'MEDICO' %}
+        <li class="nav-item">
+          <a href="{% url 'citas:agenda_medico' %}" class="nav-link">
+            <i class="bi bi-calendar-check me-2"></i>Mi Agenda
+          </a>
+        </li>
+      {% elif user.tipo_usuario == 'PACIENTE' %}
+        <li class="nav-item">
+          <a href="{% url 'citas:mis_citas' %}" class="nav-link">
+            <i class="bi bi-calendar-check me-2"></i>Mis Citas
+          </a>
+        </li>
+        <li class="nav-item mt-2">
+          <a href="{% url 'citas:cita_create' %}" class="btn btn-light text-primary fw-bold w-100 text-start shadow-sm d-flex align-items-center justify-content-center py-2">
+            <i class="bi bi-plus-circle-fill me-2 fs-5"></i>Agendar Cita
+          </a>
+        </li>
+      {% endif %}
+
+      <!-- Panel de Gestión de Turnos para Administradores -->
+      {% if user.is_superuser or user.tipo_usuario == 'ADMIN' %}
+        <li class="nav-item mt-2">
+          <a href="{% url 'citas:turno_list' %}" class="nav-link text-warning fw-semibold">
+            <i class="bi bi-calendar-range me-2"></i>Gestión Turnos
+          </a>
+        </li>
+      {% endif %}
+    {% endif %}
+  </ul>
+
+  <hr class="text-white-50 my-3">
+
+  <!-- Menú Inferior / Perfil de Usuario -->
+  {% if user.is_authenticated %}
+    <div class="dropdown">
+      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle w-100 p-2 rounded-3 bg-dark bg-opacity-50" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle fs-4 me-2 text-info"></i>
+        <div class="d-flex flex-column text-truncate" style="line-height: 1.2;">
+          <strong class="text-truncate">{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</strong>
+          <small class="text-white-50" style="font-size: 0.75rem;">{{ user.get_tipo_usuario_display }}</small>
+        </div>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-dark text-small shadow w-100 mb-2" aria-labelledby="userDropdown">
+        <li>
+          <span class="dropdown-item-text text-muted bg-transparent">
+            <small class="text-truncate d-block">{{ user.email|default:user.username }}</small>
+          </span>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        
+        {% if user.tipo_usuario == 'PACIENTE' %}
+          <li><a class="dropdown-item py-2" href="{% url 'citas:mis_citas' %}"><i class="bi bi-calendar-week me-2"></i>Mis Citas</a></li>
+        {% elif user.tipo_usuario == 'MEDICO' %}
+          <li><a class="dropdown-item py-2" href="{% url 'citas:agenda_medico' %}"><i class="bi bi-calendar-week me-2"></i>Mi Agenda</a></li>
+        {% elif user.tipo_usuario == 'ADMIN' or user.is_superuser %}
+          <li><a class="dropdown-item py-2" href="{% url 'citas:turno_list' %}"><i class="bi bi-calendar-range me-2"></i>Gestión de Turnos</a></li>
+          <li><a class="dropdown-item py-2" href="/admin/" target="_blank"><i class="bi bi-shield-lock me-2"></i>Django Admin</a></li>
+        {% endif %}
+        
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <form action="{% url 'usuarios:logout' %}" method="post" class="m-0 p-0">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item text-danger py-2 w-100 text-start">
+              <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  {% else %}
+    <div class="d-flex flex-column gap-2 w-100">
+      <a href="{% url 'usuarios:login' %}" class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+      </a>
+      <a href="{% url 'usuarios:registro' %}" class="btn btn-light text-primary btn-sm fw-semibold d-flex align-items-center justify-content-center">
+        <i class="bi bi-person-plus-fill me-2"></i>Registrarse
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Script interactivo de la barra lateral -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById('toggleSidebarBtn');
+    const mobileToggle = document.getElementById('mobileSidebarToggle');
+    const sidebar = document.getElementById('sidebarContainer');
+    const mainContent = document.getElementById('mainContentWrapper');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('sidebar-hidden');
+            if (mainContent) {
+                mainContent.classList.toggle('content-expanded');
+            }
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar.classList.contains('sidebar-hidden')) {
+                icon.classList.remove('bi-arrow-left-square');
+                icon.classList.add('bi-arrow-right-square');
+            } else {
+                icon.classList.remove('bi-arrow-right-square');
+                icon.classList.add('bi-arrow-left-square');
+            }
+        });
+    }
+
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('mobile-show');
+        });
+    }
+});
+</script>

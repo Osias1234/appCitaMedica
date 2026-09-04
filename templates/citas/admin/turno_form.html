@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7">
+            
+            <!-- Tarjeta Principal con Bordes Redondeados y Sombra Suave -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                
+                <!-- Cabecera Estilizada -->
+                <div class="card-header bg-gradient bg-primary text-white p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white text-primary rounded-3 p-3 me-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-calendar-plus fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 fw-bold mb-1">
+                                {% if object %}Editar Turno Médico{% else %}Registrar Nuevo Turno{% endif %}
+                            </h3>
+                            <p class="text-white-50 small mb-0">Configura los bloques horarios de atención para los especialistas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cuerpo del Formulario -->
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <form method="post" novalidate class="needs-validation">
+                        {% csrf_token %}
+                        
+                        <!-- Mensajes de Error Globales -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+                            <div>{{ form.non_field_errors }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Campo Médico -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark small text-uppercase tracking-wider">
+                                <i class="bi bi-person-badge text-primary me-1"></i> Médico Asignado
+                            </label>
+                            <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-person"></i></span>
+                                {{ form.medico }}
+                            </div>
+                            <div class="text-danger small mt-1 ps-1">{{ form.medico.errors }}</div>
+                        </div>
+                        
+                        <!-- Fila de Fechas y Horas -->
+                        <div class="row g-3 mb-4">
+                            <!-- Fecha -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-dark small text-uppercase tracking-wider">
+                                    <i class="bi bi-calendar-event text-primary me-1"></i> Fecha del Turno
+                                </label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-calendar3"></i></span>
+                                    {{ form.fecha }}
+                                </div>
+                                <div class="text-danger small mt-1 ps-1">{{ form.fecha.errors }}</div>
+                            </div>
+                            
+                            <!-- Hora de Inicio -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark small text-uppercase tracking-wider">
+                                    <i class="bi bi-clock text-primary me-1"></i> Hora de Inicio
+                                </label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-hourglass-top"></i></span>
+                                    {{ form.hora_inicio }}
+                                </div>
+                                <div class="text-danger small mt-1 ps-1">{{ form.hora_inicio.errors }}</div>
+                            </div>
+                            
+                            <!-- Hora de Fin -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark small text-uppercase tracking-wider">
+                                    <i class="bi bi-clock-fill text-primary me-1"></i> Hora de Fin
+                                </label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-hourglass-bottom"></i></span>
+                                    {{ form.hora_fin }}
+                                </div>
+                                <div class="text-danger small mt-1 ps-1">{{ form.hora_fin.errors }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Interruptor de Estado (Switch) -->
+                        <div class="bg-light p-3 rounded-3 mb-4 d-flex align-items-center justify-content-between border">
+                            <div class="d-flex align-items-center">
+                                <div class="text-primary fs-4 me-3"><i class="bi bi-toggle-on"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Disponibilidad del Turno</h6>
+                                    <small class="text-muted">Permite que los pacientes seleccionen este horario inmediatamente</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch fs-5">
+                                {{ form.activo }}
+                            </div>
+                        </div>
+                        <div class="text-danger small mt-1 mb-3">{{ form.activo.errors }}</div>
+                        
+                        <!-- Botones de Acción -->
+                        <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top">
+                            <a href="{% url 'citas:turno_list' %}" class="btn btn-light px-4 py-2 fw-semibold text-muted border">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm d-flex align-items-center">
+                                <i class="bi bi-check2-circle me-2 fs-5"></i> Guardar Turno
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Script opcional para inyectar clases de Bootstrap a los widgets de Django automáticamente si no tienen la clase form-control -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Selecciona todos los inputs, selects y textareas generados por Django para darles estilo Bootstrap nativo
+        const inputs = document.querySelectorAll('input:not([type="checkbox"]), select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control') && !input.classList.contains('form-select')) {
+                if (input.tagName === 'SELECT') {
+                    input.classList.add('form-select', 'border-0', 'bg-light', 'py-2');
+                } else {
+                    input.classList.add('form-control', 'border-0', 'bg-light', 'py-2');
+                }
+            }
+        });
+        
+        // Estilo específico para el switch de Django si es un checkbox
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.classList.add('form-check-input');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="h3 mb-0 text-dark fw-bold">
+                <i class="bi bi-calendar-check-fill me-2 text-primary"></i>Mis Citas Médicas
+            </h2>
+            <p class="text-muted mb-0 mt-1">Consulta, agenda o gestiona el estado de tus citas con los especialistas</p>
+        </div>
+        <a href="{% url 'citas:cita_create' %}" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold d-flex align-items-center justify-content-center">
+            <i class="bi bi-plus-circle me-2 fs-5"></i> Agendar Nueva Cita
+        </a>
+    </div>
+
+    <!-- Buscador Avanzado -->
+    <div class="card border-0 shadow-sm mb-4 rounded-4 bg-light">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-10">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Buscar por especialidad (ej. Cardiología, Pediatría)..." value="{{ request.GET.q }}">
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold shadow-sm">Buscar</button>
+                    {% if request.GET.q %}
+                        <a href="{% url 'citas:mis_citas' %}" class="btn btn-outline-secondary px-3" title="Limpiar filtro">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de citas -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+            <h5 class="h6 mb-0 text-dark fw-bold">
+                <i class="bi bi-journal-medical text-primary me-2"></i>Historial de Citas
+            </h5>
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">{{ citas|length }} registradas</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small text-uppercase">
+                        <tr>
+                            <th class="ps-4">Fecha y Hora</th>
+                            <th>Especialidad</th>
+                            <th>Médico</th>
+                            <th>Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr class="border-bottom">
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ cita.fecha|date:"d/m/Y" }}</div>
+                                <div class="text-primary small fw-semibold"><i class="bi bi-clock me-1"></i>{{ cita.hora|time:"H:i" }}</div>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">{{ cita.medico.especialidad.nombre }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle p-2 me-2 text-primary d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;">
+                                        <i class="bi bi-person-badge"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold text-dark d-block">Dr(a). {{ cita.medico.usuario.get_full_name|default:cita.medico.usuario.username }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if cita.estado == 'PENDIENTE' %}
+                                    <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning-subtle px-3 py-2">
+                                        <i class="bi bi-hourglass-split me-1"></i> Pendiente
+                                    </span>
+                                {% elif cita.estado == 'CONFIRMADA' %}
+                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i> Confirmada
+                                    </span>
+                                {% elif cita.estado == 'COMPLETADA' %}
+                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2">
+                                        <i class="bi bi-check-all me-1"></i> Completada
+                                    </span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-2">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelada
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if cita.estado == 'PENDIENTE' or cita.estado == 'CONFIRMADA' %}
+                                    <!-- Enlace funcional para cancelar la cita (asegúrate de tener la ruta configurada en urls.py) -->
+                                    <a href="{% url 'citas:cita_cancel' cita.pk %}" class="btn btn-sm btn-outline-danger px-3 fw-semibold shadow-sm">
+                                        <i class="bi bi-x-lg me-1"></i> Cancelar
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small italic">Sin acciones disponibles</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                                    <p class="text-muted mt-3 mb-0 fw-medium">No tienes citas agendadas que coincidan con tu búsqueda.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

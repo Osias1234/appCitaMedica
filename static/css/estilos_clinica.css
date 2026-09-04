@@ -1,0 +1,199 @@
+/* ==========================================================================
+   SISTEMA DE CITAS MÉDICAS - HOJA DE ESTILOS PROFESIONAL
+   Paleta Médica: Teal Profundo, Azul Clínico y Acentos Suaves
+   ========================================================================== */
+
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --medical-teal: #0d9488;
+    --medical-teal-dark: #0f766e;
+    --medical-bg: #c1ddf7;
+    --medical-card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --sidebar-width: 280px;
+    --transition-speed: 0.3s ease-in-out;
+}
+
+/* Tipografía y Base */
+body {
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-main);
+    background-color: var(--medical-bg) !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   BARRA LATERAL (SIDEBAR) PROFESIONAL
+   ========================================================================== */
+.sidebar-fixed {
+    width: var(--sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    height: 100vh;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #f8fafc;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08);
+    transition: transform var(--transition-speed);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+}
+
+.sidebar-fixed hr {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.sidebar-fixed .nav-link {
+    color: #94a3b8;
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-fixed .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+
+.sidebar-fixed .nav-link.active,
+.sidebar-fixed .nav-link:focus {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--medical-teal), var(--medical-teal-dark));
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.sidebar-fixed .nav-link i {
+    font-size: 1.15rem;
+    transition: color 0.2s;
+}
+
+/* Estado Oculto Sidebar */
+.sidebar-hidden {
+    transform: translateX(calc(var(--sidebar-width) * -1));
+}
+
+/* ==========================================================================
+   CONTENEDOR PRINCIPAL Y DISEÑO RESPONSIVO
+   ========================================================================== */
+#mainContentWrapper {
+    margin-left: var(--sidebar-width);
+    transition: margin-left var(--transition-speed);
+    min-height: 100vh;
+    background-color: var(--medical-bg);
+}
+
+.content-expanded {
+    margin-left: 0 !important;
+}
+
+@media (max-width: 991.98px) {
+    #mainContentWrapper {
+        margin-left: 0 !important;
+        padding: 1rem !important;
+    }
+    .sidebar-fixed {
+        transform: translateX(calc(var(--sidebar-width) * -1));
+    }
+    .sidebar-fixed.mobile-show {
+        transform: translateX(0);
+    }
+}
+
+/* ==========================================================================
+   TARJETAS Y COMPONENTES UI MÉDICOS
+   ========================================================================== */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: var(--medical-card-bg);
+}
+
+.card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.55rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    border: none;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0b5ed7, #0a58ca);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Tablas Modernas Limpias */
+.table {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #f1f5f9;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    color: var(--text-main);
+    border-bottom-color: #f1f5f9;
+}
+
+/* Badges y Estados Médicos */
+.badge {
+    padding: 0.5em 0.85em;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Inputs y Formularios */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 0.65rem 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--medical-teal);
+    box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.15);
+}
+
+/* Dropdown Usuario */
+.dropdown-menu {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+}
+
+.dropdown-item {
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    transition: background-color 0.2s;
+}
